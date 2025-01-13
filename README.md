@@ -27,13 +27,12 @@ OSM Express is a compact 1,500 LOC, and really a cobbling together of a few low-
 
 ## Installation
 
-Binary releases are available at [Releases](https://github.com/bdon/OSMExpress/releases).
-
 [See the manual for instructions on building from source](/docs/PROGRAMMING_GUIDE.md). 
 
 ## Usage
 
-OSM Express is being used in production, but should still be considered experimental with an unstable API.
+OSM Express is being used in production for [SliceOSM](https://slice.openstreetmap.us) and the file format is stable.
+
 * Use the `osmx` command line tool to expand a .osm.pbf to an .osmx database and perform basic tasks such as extracting regions or querying by ID. No programming required.
 * Use the [Python library](python/) library via `pip install osmx` to access an .osmx database programatically. See the [Python Examples](python/examples) for how to create command line tools, webservers or detailed diffs based on minutely data. 
 * Use the C++ library to access an .osmx database programatically. 
@@ -54,7 +53,7 @@ Detailed command line usage can be found in the [Manual](docs/MANUAL.md).
 
 ### Headers
 
-The C++ API is currently very rough with minimal abstraction. [examples/way_wkt.cpp](examples/way_wkt.cpp) is a short, commented C++ program that uses the headers to read a way from a .osmx file and outputs its [Well-Known Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) LineString geometry.
+The C++ API is very rough with minimal abstraction. [examples/way_wkt.cpp](examples/way_wkt.cpp) is a short, commented C++ program that uses the headers to read a way from a .osmx file and outputs its [Well-Known Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) LineString geometry.
 
 ```bash
 ./way_wkt ../ny.osmx 34633854
@@ -74,4 +73,4 @@ docker build -t osmx .
 
 ## License and Development
 
-2-Clause BSD, see [LICENSE.md](LICENSE.md). Bug reports, pull requests welcome! For support, new features, and integration, contact [brandon@protomaps.com](mailto:brandon@protomaps.com).
+2-Clause BSD, see [LICENSE.md](LICENSE.md).

@@ -19,7 +19,7 @@ via Apt package manager: `sudo apt install cmake clang libbz2-dev libz-dev libex
 
 ### Build Instructions
 
-    git clone --recursive https://github.com/protomaps/OSMExpress.git
+    git clone --recursive https://github.com/bdon/OSMExpress.git
     cd OSMExpress
     cmake -DCMAKE_BUILD_TYPE=Release .
     make
@@ -31,11 +31,11 @@ For macOS systems with Apple Silicon, this path is `-DOPENSSL_ROOT_DIR=/opt/home
 
 ### Example: Way ID to WKT
 
-See [examples/way_wkt.cpp](https://github.com/protomaps/OSMExpress/blob/main/examples/way_wkt.cpp) for a commented program.
+See [examples/way_wkt.cpp](https://github.com/bdon/OSMExpress/blob/main/examples/way_wkt.cpp) for a commented program.
 
 ### Example: Bbox to Way WKTs
 
-See [examples/bbox_wkt.cpp](https://github.com/protomaps/OSMExpress/blob/main/examples/way_wkt.cpp) for a commented program.
+See [examples/bbox_wkt.cpp](https://github.com/bdon/OSMExpress/blob/main/examples/way_wkt.cpp) for a commented program.
 
 ## Python
 

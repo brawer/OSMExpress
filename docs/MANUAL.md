@@ -1,6 +1,6 @@
-**OSM Express** is a database file format for OpenStreetMap data (.osmx), as well as a command line tool and C++ library for reading and writing .osmx files. Find it on GitHub at [github.com/protomaps/OSMExpress](https://github.com/protomaps/OSMExpress)
+**OSM Express** is a database file format for OpenStreetMap data (.osmx), as well as a command line tool and C++ library for reading and writing .osmx files. Find it on GitHub at [github.com/bdon/OSMExpress](https://github.com/bdon/OSMExpress)
 
-![screenshot](https://github.com/protomaps/OSMExpress/blob/main/examples/screenshot.png?raw=true)
+![screenshot](https://github.com/bdon/OSMExpress/blob/main/examples/screenshot.png?raw=true)
 
 *Illustration of the cell covering for a rectangular input region and its overlap with indexed OpenStreetMap geometries.*
 
@@ -17,17 +17,13 @@ Here are some use cases that OSM Express fits well.
 
 ### Command Line
 
-Binaries are available for MacOS (Darwin) and GNU/Linux at [GitHub Releases](https://github.com/protomaps/OSMExpress/releases).
-
 For information on how to compile the `osmx` program from source, see the [Programming Guide.](/docs/PROGRAMMING_GUIDE.md)
 
 Once you have the `osmx` command line program, you'll need to start with an .osm.pbf or OSM XML file. The Planet file is available at [planet.openstreetmap.org](https://planet.openstreetmap.org), but it's preferable to begin with something smaller to learn with.
 
-There are numerous sites for downloading .osm.pbf extracts, including [Protomaps Minutely Extracts](https://protomaps.com/downloads/osm), a service itself powered by OSM Express. For testing purposes let's start with this small PBF I generated of New York County:
+There are numerous sites for downloading .osm.pbf extracts, including [SliceOSM](https://slice.openstreetmap.us), a service itself powered by OSM Express.
 
-[new\_york\_county.pbf (5.86 MB, generated 2019/09/02 6:42PM UTC)](https://protomaps-static.s3.us-east-2.amazonaws.com/new_york_county.osm.pbf)
-
-Create an .osmx file by using the `expand` command on the .osm.pbf file:
+Example: create an .osmx file by using the `expand` command on the .osm.pbf file:
 
     osmx expand new_york_county.osm.pbf new_york_county.osmx
 
@@ -114,7 +110,7 @@ The `osmx query` command with no arguments reveals the layout of an .osmx databa
 an .osmx file is a LMDB database with 10 sub-databases. All keys are 64 bit integers in [host byte order](https://en.wikipedia.org/wiki/Endianness) (little-endian on most modern CPUs).
 
 * `locations`: maps OSM node IDs to Locations, which store the coordinates and version number of the node (documented below).
-* `nodes`, `ways`, `relations` map OSM object IDs to a Cap'n Proto message defined in [`include/osmx/messages.capnp`](https://github.com/protomaps/OSMExpress/blob/main/include/osmx/messages.capnp).
+* `nodes`, `ways`, `relations` map OSM object IDs to a Cap'n Proto message defined in [`include/osmx/messages.capnp`](https://github.com/bdon/OSMExpress/blob/main/include/osmx/messages.capnp).
     - `nodes` only contains *tagged* nodes; the value for each key describes the node's tags and other metadata. Untagged nodes are included only in `locations` to save space on disk.
     - `ways` contains all ways; the value for each key describes the way's tags, metadata, and the list of node IDs that are part of the way.
     - `relations` contains all relations; the value for each key contains the relation's tags, metadata, and the IDs and roles of its members.
@@ -146,10 +142,6 @@ Longitude and latitude are stored as integers. To obtain the actual longitude an
 OSM Express avoids expensive point-in-polygon computations for spatial operations. Instead, a query region is approximated by S2 cells with maximum level 16. The level 16 is chosen as a reasonable tradeoff between covering precision and storage space.
 
 *Author's note: the S2 Covering of a region may differ depending on choice of architecture and compiler, while still being valid. Let me know if you know how to make this consistent.*
-
-## Further Development
-
-If you'd like to sponsor development of OSM Express features, or integrate it into your product, get in contact at [brandon@protomaps.com](mailto:brandon@protomaps.com).
 
 ## Presentations
 

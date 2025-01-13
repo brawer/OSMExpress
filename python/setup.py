@@ -17,7 +17,7 @@ setuptools.setup(
     license="BSD-2-Clause",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/protomaps/OSMExpress",
+    url="https://github.com/bdon/OSMExpress",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

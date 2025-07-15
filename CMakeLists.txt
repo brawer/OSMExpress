@@ -12,6 +12,36 @@ set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 set(ROARING_BUILD_STATIC ON CACHE INTERNAL "")
 set(ROARING_LINK_STATIC ON CACHE INTERNAL "")
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(FetchContent)
+
+FetchContent_Declare(
+    Osmium
+    GIT_REPOSITORY https://github.com/osmcode/libosmium.git
+    GIT_TAG v2.22.0
+    SOURCE_SUBDIR test/catch
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
+FetchContent_Declare(
+    Protozero
+    GIT_REPOSITORY https://github.com/mapbox/protozero.git
+    GIT_TAG v1.8.0
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
+FetchContent_MakeAvailable(Osmium Protozero)
+
+if(NOT OSMIUM_FOUND)
+    add_library(Osmium INTERFACE)
+    include_directories(SYSTEM ${osmium_SOURCE_DIR}/include)
+endif()
+
+if(NOT Protozero_FOUND)
+    add_library(Protozero INTERFACE)
+    include_directories(SYSTEM ${protozero_SOURCE_DIR}/include)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/capnproto EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2geometry EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
@@ -21,8 +51,6 @@ add_custom_target(build_lmdb COMMAND make liblmdb.a CC=clang XCFLAGS=-D_WANT_SEM
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/lmdb/libraries/liblmdb
 )
 
-include_directories(vendor/libosmium/include)
-include_directories(vendor/protozero/include)
 include_directories(vendor/s2geometry/src)
 include_directories(vendor/CRoaring/cpp)
 include_directories(vendor/CRoaring/include)

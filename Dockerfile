@@ -1,23 +1,38 @@
-FROM ubuntu:18.04 AS builder
+FROM alpine:3.22 AS builder
 
-RUN apt-get update && apt-get install -y \
-    cmake \
-    clang \
-    libbz2-dev \
-    libz-dev \
-    libexpat-dev \
-    libssl-dev \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache  \
+    clang               \
+    cmake               \
+    git                 \
+    linux-headers       \
+    make                \
+    python3-dev         \
+                        \
+    bzip2-dev           \
+    capnproto-dev       \
+    expat-dev           \
+    libosmium-dev       \
+    openssl-dev         \
+    protozero-dev       \
+    zlib-dev
+
 WORKDIR /usr/src/osmexpress
 COPY . /usr/src/osmexpress
+
 RUN cmake -DCMAKE_BUILD_TYPE=Release .
-RUN make
+RUN make -j16 && ./osmxTest && make install
 
-FROM ubuntu:18.04
 
-RUN apt-get update && apt-get install -y \
-    libexpat1 \
-    libssl1.1 \
-  && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /usr/src/osmexpress/osmx /usr/local/bin/osmx
+FROM alpine:3.22
+
+# libosmium and protozero are header-only libraries, no runtime dependencies.
+RUN apk add --no-cache  \
+    libbz2              \
+    libcrypto3          \
+    capnproto           \
+    libexpat            \
+    libssl3             \
+    zlib
+
+COPY --from=builder /usr/local/bin/osmx /usr/local/bin/osmx
 ENTRYPOINT [ "/usr/local/bin/osmx" ]

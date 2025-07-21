@@ -15,6 +15,17 @@ set(ROARING_LINK_STATIC ON CACHE INTERNAL "")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(FetchContent)
 
+# TODO: Switch to a released version after next CapnProto release (post 1.2.0).
+# Reason: https://github.com/capnproto/capnproto/issues/2353
+# Change for v1: https://github.com/capnproto/capnproto/pull/2355
+# Change for v2: https://github.com/capnproto/capnproto/pull/2354
+FetchContent_Declare(
+    CapnProto
+    GIT_REPOSITORY https://github.com/capnproto/capnproto.git
+    GIT_TAG master
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
 FetchContent_Declare(
     Osmium
     GIT_REPOSITORY https://github.com/osmcode/libosmium.git
@@ -30,7 +41,11 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(Osmium Protozero)
+FetchContent_MakeAvailable(CapnProto Osmium Protozero)
+
+if(NOT CapnProto_FOUND)
+    add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 if(NOT OSMIUM_FOUND)
     add_library(Osmium INTERFACE)
@@ -42,7 +57,6 @@ if(NOT Protozero_FOUND)
     include_directories(SYSTEM ${protozero_SOURCE_DIR}/include)
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/capnproto EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2geometry EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Catch2 EXCLUDE_FROM_ALL)
@@ -57,7 +71,6 @@ include_directories(vendor/CRoaring/include)
 include_directories(vendor/cxxopts/include)
 include_directories(vendor/json/single_include)
 include_directories(vendor/lmdb/libraries/liblmdb)
-include_directories(vendor/capnproto/c++/src)
 include_directories(include)
 
 # needed for Expat install dir
@@ -66,20 +79,38 @@ include_directories(/usr/local/include)
 link_directories(osmx /usr/local/lib)
 endif()
 
-add_executable(osmx src/cmd.cpp src/storage.cpp src/expand.cpp src/extract.cpp src/update.cpp src/region.cpp)
-add_dependencies(osmx build_lmdb s2 kj capnp)
+set(CAPNPC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/capnpc_generated)
+file(MAKE_DIRECTORY ${CAPNPC_OUTPUT_DIR})
+capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS include/osmx/messages.capnp)
 
-target_link_libraries(osmx z expat bz2 s2 roaring)
+add_executable(
+    osmx
+    src/cmd.cpp
+    src/storage.cpp
+    src/expand.cpp
+    src/extract.cpp
+    src/update.cpp
+    src/region.cpp
+    ${CAPNP_SRCS})
+
+add_dependencies(osmx build_lmdb s2)
+
+target_include_directories(
+    osmx
+    PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
+
+target_link_libraries(osmx z expat bz2 s2 roaring CapnProto::capnp)
 target_link_libraries(osmx ${CMAKE_CURRENT_SOURCE_DIR}/vendor/lmdb/libraries/liblmdb/liblmdb.a)
-target_link_libraries(osmx ${CMAKE_CURRENT_SOURCE_DIR}/vendor/capnproto/c++/src/capnp/libcapnp.a)
-target_link_libraries(osmx ${CMAKE_CURRENT_SOURCE_DIR}/vendor/capnproto/c++/src/kj/libkj.a)
 
 set_property(TARGET osmx PROPERTY CXX_STANDARD 14)
 
 add_executable(osmxTest test/test_region.cpp src/region.cpp)
 set_property(TARGET osmxTest PROPERTY CXX_STANDARD 14)
-include_directories(include)
+target_include_directories(
+    osmxTest
+    PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
 target_link_libraries(osmxTest s2 Catch2::Catch2WithMain)
+
 enable_testing()
 add_test(osmxTest osmxTest)
 
@@ -87,7 +118,21 @@ install(TARGETS osmx DESTINATION bin)
 add_custom_target(archive COMMAND dist/archive.sh ${OSMX_VERSION} ${CMAKE_SYSTEM_NAME})
 add_dependencies(archive osmx)
 
-add_library(osmx-static STATIC src/storage.cpp src/expand.cpp src/extract.cpp src/update.cpp src/region.cpp)
+add_library(
+    osmx-static
+    STATIC
+    src/storage.cpp
+    src/expand.cpp
+    src/extract.cpp
+    src/update.cpp
+    src/region.cpp)
+
 set_property(TARGET osmx-static PROPERTY CXX_STANDARD 14)
 
-add_dependencies(osmx-static build_lmdb s2 kj capnp)
+target_include_directories(
+    osmx-static
+    PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
+
+target_link_libraries(osmx-static z expat bz2 s2 roaring CapnProto::capnp)
+
+add_dependencies(osmx-static build_lmdb)

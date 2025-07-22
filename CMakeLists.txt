@@ -34,6 +34,13 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS 3)
 
 FetchContent_Declare(
+    LMDB
+    GIT_REPOSITORY https://git.openldap.org/openldap/openldap.git
+    GIT_TAG OPENLDAP_REL_ENG_2_6_10
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
+FetchContent_Declare(
     Osmium
     GIT_REPOSITORY https://github.com/osmcode/libosmium.git
     GIT_TAG v2.22.0
@@ -48,10 +55,27 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(CapnProto Catch2 Osmium Protozero)
+FetchContent_MakeAvailable(CapnProto Catch2 LMDB Osmium Protozero)
 
 if(NOT CapnProto_FOUND)
     add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+if(NOT TARGET LMDB::LMDB)
+    set(LMDB_INCLUDE_DIR ${lmdb_SOURCE_DIR}/libraries/liblmdb)
+    add_library(
+        LMDB_LMDB
+        STATIC
+            ${lmdb_SOURCE_DIR}/libraries/liblmdb/mdb.c
+            ${lmdb_SOURCE_DIR}/libraries/liblmdb/midl.c)
+    target_include_directories(LMDB_LMDB PUBLIC ${LMDB_INCLUDE_DIR})
+
+    add_library(LMDB::LMDB INTERFACE IMPORTED)
+    set_target_properties(
+        LMDB::LMDB
+        PROPERTIES
+            INTERFACE_LINK_LIBRARIES LMDB_LMDB
+            INTERFACE_INCLUDE_DIRECTORIES ${LMDB_INCLUDE_DIR})
 endif()
 
 if(NOT OSMIUM_FOUND)
@@ -67,16 +91,11 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2geometry EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
 
-add_custom_target(build_lmdb COMMAND make liblmdb.a CC=clang XCFLAGS=-D_WANT_SEMUN
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/lmdb/libraries/liblmdb
-)
-
 include_directories(vendor/s2geometry/src)
 include_directories(vendor/CRoaring/cpp)
 include_directories(vendor/CRoaring/include)
 include_directories(vendor/cxxopts/include)
 include_directories(vendor/json/single_include)
-include_directories(vendor/lmdb/libraries/liblmdb)
 include_directories(include)
 
 # needed for Expat install dir
@@ -99,14 +118,13 @@ add_executable(
     src/region.cpp
     ${CAPNP_SRCS})
 
-add_dependencies(osmx build_lmdb s2)
+add_dependencies(osmx s2)
 
 target_include_directories(
     osmx
     PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
 
-target_link_libraries(osmx z expat bz2 s2 roaring CapnProto::capnp)
-target_link_libraries(osmx ${CMAKE_CURRENT_SOURCE_DIR}/vendor/lmdb/libraries/liblmdb/liblmdb.a)
+target_link_libraries(osmx z expat bz2 LMDB::LMDB s2 roaring CapnProto::capnp)
 
 set_property(TARGET osmx PROPERTY CXX_STANDARD 14)
 
@@ -139,6 +157,5 @@ target_include_directories(
     osmx-static
     PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
 
-target_link_libraries(osmx-static z expat bz2 s2 roaring CapnProto::capnp)
+target_link_libraries(osmx-static z expat bz2 s2 roaring CapnProto::capnp LMDB::LMDB)
 
-add_dependencies(osmx-static build_lmdb)

@@ -13,6 +13,7 @@ RUN apk add --no-cache  \
     capnproto-dev       \
     expat-dev           \
     libosmium-dev       \
+    lmdb-dev            \
     openssl-dev         \
     protozero-dev       \
     zlib-dev
@@ -33,6 +34,7 @@ RUN apk add --no-cache  \
     capnproto           \
     libexpat            \
     libssl3             \
+    lmdb                \
     zlib
 
 COPY --from=builder /usr/local/bin/osmx /usr/local/bin/osmx

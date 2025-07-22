@@ -34,6 +34,13 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS 3)
 
 FetchContent_Declare(
+    cxxopts
+    GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+    GIT_TAG v3.3.1
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
+FetchContent_Declare(
     LMDB
     GIT_REPOSITORY https://git.openldap.org/openldap/openldap.git
     GIT_TAG OPENLDAP_REL_ENG_2_6_10
@@ -55,7 +62,7 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(CapnProto Catch2 LMDB Osmium Protozero)
+FetchContent_MakeAvailable(CapnProto Catch2 cxxopts LMDB Osmium Protozero)
 
 if(NOT CapnProto_FOUND)
     add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
@@ -94,7 +101,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
 include_directories(vendor/s2geometry/src)
 include_directories(vendor/CRoaring/cpp)
 include_directories(vendor/CRoaring/include)
-include_directories(vendor/cxxopts/include)
 include_directories(vendor/json/single_include)
 include_directories(include)
 
@@ -124,16 +130,24 @@ target_include_directories(
     osmx
     PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
 
-target_link_libraries(osmx z expat bz2 LMDB::LMDB s2 roaring CapnProto::capnp)
+target_link_libraries(
+    osmx
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z)
 
 set_property(TARGET osmx PROPERTY CXX_STANDARD 14)
 
 add_executable(osmxTest test/test_region.cpp src/region.cpp)
+
 set_property(TARGET osmxTest PROPERTY CXX_STANDARD 14)
+
 target_include_directories(
     osmxTest
     PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
-target_link_libraries(osmxTest s2 Catch2::Catch2WithMain)
+
+target_link_libraries(
+    osmxTest
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z
+    Catch2::Catch2WithMain)
 
 enable_testing()
 add_test(osmxTest osmxTest)
@@ -157,5 +171,7 @@ target_include_directories(
     osmx-static
     PUBLIC include ${CAPNPC_OUTPUT_DIR}/include)
 
-target_link_libraries(osmx-static z expat bz2 s2 roaring CapnProto::capnp LMDB::LMDB)
+target_link_libraries(
+    osmx-static
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z)
 

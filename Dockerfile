@@ -11,6 +11,7 @@ RUN apk add --no-cache  \
     bzip2-dev           \
     catch2-3            \
     capnproto-dev       \
+    cxxopts-dev         \
     expat-dev           \
     libosmium-dev       \
     lmdb-dev            \
@@ -27,7 +28,8 @@ RUN make -j16 && ./osmxTest && make install
 
 FROM alpine:3.22
 
-# libosmium and protozero are header-only libraries, no runtime dependencies.
+# cxxopts, libosmium and protozero are header-only C++ libraries;
+# catch2 is only used for testing. We do not need to install these.
 RUN apk add --no-cache  \
     libbz2              \
     libcrypto3          \

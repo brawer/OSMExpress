@@ -27,6 +27,13 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS)
 
 FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.8.1
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS 3)
+
+FetchContent_Declare(
     Osmium
     GIT_REPOSITORY https://github.com/osmcode/libosmium.git
     GIT_TAG v2.22.0
@@ -41,7 +48,7 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(CapnProto Osmium Protozero)
+FetchContent_MakeAvailable(CapnProto Catch2 Osmium Protozero)
 
 if(NOT CapnProto_FOUND)
     add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
@@ -59,7 +66,6 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2geometry EXCLUDE_FROM_ALL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Catch2 EXCLUDE_FROM_ALL)
 
 add_custom_target(build_lmdb COMMAND make liblmdb.a CC=clang XCFLAGS=-D_WANT_SEMUN
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/lmdb/libraries/liblmdb

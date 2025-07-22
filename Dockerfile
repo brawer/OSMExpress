@@ -9,6 +9,7 @@ RUN apk add --no-cache  \
     python3-dev         \
                         \
     bzip2-dev           \
+    catch2-3            \
     capnproto-dev       \
     expat-dev           \
     libosmium-dev       \

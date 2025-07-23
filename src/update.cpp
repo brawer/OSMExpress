@@ -10,6 +10,7 @@
 #include "s2/s2latlng.h"
 #include "s2/s2cell_union.h"
 #include "osmx/storage.h"
+#include "osmx/util.h"
 
 using namespace std;
 using namespace osmx;
@@ -259,7 +260,7 @@ void cmdUpdate(int argc, char* argv[]) {
 
   MDB_env* env = db::createEnv(osmx,true);
   MDB_txn* txn;
-  CHECK(mdb_txn_begin(env, NULL, 0, &txn));
+  CHECK_LMDB(mdb_txn_begin(env, NULL, 0, &txn));
 
   string old_seqnum = "UNKNOWN";
   auto new_seqnum = result["seqnum"].as<string>();
@@ -282,7 +283,7 @@ void cmdUpdate(int argc, char* argv[]) {
       metadata.put("osmosis_replication_sequence_number",new_seqnum);
       metadata.put("osmosis_replication_timestamp",new_timestamp);
     }
-    CHECK(mdb_txn_commit(txn));
+    CHECK_LMDB(mdb_txn_commit(txn));
     cout << "Committed: ";
   } else {
     mdb_txn_abort(txn);

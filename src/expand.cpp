@@ -12,6 +12,7 @@
 #include "s2/s2latlng.h"
 #include "s2/s2cell_id.h"
 #include "osmx/storage.h"
+#include "osmx/util.h"
 #include "osmx/messages.capnp.h"
 
 using namespace std;
@@ -138,7 +139,7 @@ class Handler: public osmium::handler::Handler {
   }
 
   ~Handler() {
-    CHECK(mdb_txn_commit(mTxn));
+    CHECK_LMDB(mdb_txn_commit(mTxn));
     mCellNode.writeDb(mEnv);
     mNodeWay.writeDb(mEnv);
     mNodeRelation.writeDb(mEnv);
@@ -268,7 +269,7 @@ void cmdExpand(int argc, char* argv[]) {
   Timer timer("convert");
   MDB_env* env = db::createEnv(output,true);
   MDB_txn* txn;
-  CHECK(mdb_txn_begin(env, NULL, 0, &txn));
+  CHECK_LMDB(mdb_txn_begin(env, NULL, 0, &txn));
 
   const osmium::io::File input_file{input};
   osmium::io::ReaderWithProgressBar reader{true, input_file, osmium::osm_entity_bits::object};

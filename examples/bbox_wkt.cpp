@@ -1,6 +1,7 @@
 #include <vector>
 #include <iomanip>
 #include "osmx/storage.h"
+#include "osmx/util.h"
 #include "s2/s2latlng.h"
 #include "s2/s2region_coverer.h"
 #include "s2/s2latlng_rect.h"
@@ -20,7 +21,7 @@ int main(int argc, char* argv[]) {
 
   MDB_env* env = osmx::db::createEnv(args[1]);
   MDB_txn* txn;
-  CHECK(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  CHECK_LMDB(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
 
   // Create a S2LatLngRect.
   auto lo = S2LatLng::FromDegrees(stof(args[3]),stof(args[2]));
@@ -44,8 +45,8 @@ int main(int argc, char* argv[]) {
   Roaring64Map node_ids;
   MDB_dbi dbi;
   MDB_cursor *cursor;
-  CHECK(mdb_dbi_open(txn, "cell_node", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-  CHECK(mdb_cursor_open(txn,dbi,&cursor));
+  CHECK_LMDB(mdb_dbi_open(txn, "cell_node", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+  CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
   for (auto cell_id : covering.cell_ids()) {
     osmx::db::traverseCell(cursor,cell_id,node_ids);
   }
@@ -55,8 +56,8 @@ int main(int argc, char* argv[]) {
 
   // Get all way_ids that are referred to by node_ids.
   Roaring64Map way_ids;
-  CHECK(mdb_dbi_open(txn, "node_way", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-  CHECK(mdb_cursor_open(txn,dbi,&cursor));
+  CHECK_LMDB(mdb_dbi_open(txn, "node_way", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+  CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
   for (auto const &node_id : node_ids) {
     osmx::db::traverseReverse(cursor,node_id,way_ids);
   }

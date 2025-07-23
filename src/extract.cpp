@@ -12,6 +12,7 @@
 #include "nlohmann/json.hpp"
 #include "osmx/storage.h"
 #include "osmx/region.h"
+#include "osmx/util.h"
 
 using namespace std;
 using namespace osmx;
@@ -152,7 +153,7 @@ void cmdExtract(int argc, char * argv[]) {
 
   MDB_env* env = db::createEnv(result["osmx"].as<string>(),false);
   MDB_txn* txn;
-  CHECK(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  CHECK_LMDB(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
 
   db::Metadata metadata(txn);
   auto timestamp = metadata.get("osmosis_replication_timestamp");
@@ -165,8 +166,8 @@ void cmdExtract(int argc, char * argv[]) {
     ProgressSection section(prog,prog.cells_total,prog.cells_prog,covering.size(),jsonOutput);
     MDB_dbi dbi;
     MDB_cursor *cursor;
-    CHECK(mdb_dbi_open(txn, "cell_node", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-    CHECK(mdb_cursor_open(txn,dbi,&cursor));
+    CHECK_LMDB(mdb_dbi_open(txn, "cell_node", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+    CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
     for (auto cell_id : covering.cell_ids()) {
       db::traverseCell(cursor,cell_id,node_ids);
       section.tick();
@@ -178,8 +179,8 @@ void cmdExtract(int argc, char * argv[]) {
     ProgressSection section(prog,prog.nodes_total,prog.nodes_prog,node_ids.cardinality(),jsonOutput);
     MDB_dbi dbi;
     MDB_cursor *cursor;
-    CHECK(mdb_dbi_open(txn, "node_way", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-    CHECK(mdb_cursor_open(txn,dbi,&cursor));
+    CHECK_LMDB(mdb_dbi_open(txn, "node_way", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+    CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
     for (auto const &node_id : node_ids) {
       db::traverseReverse(cursor,node_id,way_ids);
       section.tick();
@@ -191,8 +192,8 @@ void cmdExtract(int argc, char * argv[]) {
   {
     MDB_dbi dbi;
     MDB_cursor *cursor;
-    CHECK(mdb_dbi_open(txn, "node_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-    CHECK(mdb_cursor_open(txn,dbi,&cursor));
+    CHECK_LMDB(mdb_dbi_open(txn, "node_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+    CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
     for (auto const &node_id : node_ids) {
       db::traverseReverse(cursor,node_id,relation_ids);
     }
@@ -201,8 +202,8 @@ void cmdExtract(int argc, char * argv[]) {
   {
     MDB_dbi dbi;
     MDB_cursor *cursor;
-    CHECK(mdb_dbi_open(txn, "way_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-    CHECK(mdb_cursor_open(txn,dbi,&cursor));
+    CHECK_LMDB(mdb_dbi_open(txn, "way_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+    CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
     for (auto const &way_id : way_ids) {
       db::traverseReverse(cursor,way_id,relation_ids);
     }
@@ -211,8 +212,8 @@ void cmdExtract(int argc, char * argv[]) {
   {
     MDB_dbi dbi;
     MDB_cursor *cursor;
-    CHECK(mdb_dbi_open(txn, "relation_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
-    CHECK(mdb_cursor_open(txn,dbi,&cursor));
+    CHECK_LMDB(mdb_dbi_open(txn, "relation_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
+    CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
     Roaring64Map discovered_relations;
     Roaring64Map discovered_relations_2;
 

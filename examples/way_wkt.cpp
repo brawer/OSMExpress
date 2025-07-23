@@ -1,6 +1,7 @@
 #include <vector>
 #include <iomanip>
 #include "osmx/storage.h"
+#include "osmx/util.h"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ int main(int argc, char* argv[]) {
   // Opening a database: create an Environment, and then a Transaction within the environment. 
   MDB_env* env = osmx::db::createEnv(args[1]);
   MDB_txn* txn;
-  CHECK(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  CHECK_LMDB(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
 
   // Create a Database handle for each element type within the Transaction.
   osmx::db::Locations locations(txn);

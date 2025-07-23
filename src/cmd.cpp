@@ -1,6 +1,7 @@
 #include <vector>
 #include "osmx/storage.h"
 #include "osmx/cmd.h"
+#include "osmx/util.h"
 
 using namespace std;
 using namespace osmx;
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
     }
     MDB_env* env = db::createEnv(args[2]);
     MDB_txn* txn;
-    CHECK(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+    CHECK_LMDB(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
 
     if (args.size() >= 4) {
       if (args[3] == "node") {
@@ -97,9 +98,9 @@ int main(int argc, char* argv[]) {
       auto tables = {"locations","nodes","ways","relations","cell_node","node_way","node_relation","way_relation","relation_relation"};
       for (auto const &table : tables) {
         MDB_dbi dbi;
-        CHECK(mdb_dbi_open(txn, table, MDB_INTEGERKEY, &dbi));
+        CHECK_LMDB(mdb_dbi_open(txn, table, MDB_INTEGERKEY, &dbi));
         MDB_stat stat;
-        CHECK(mdb_stat(txn,dbi,&stat));
+        CHECK_LMDB(mdb_stat(txn,dbi,&stat));
         cout << table << ": " << stat.ms_entries << endl;
       }
 

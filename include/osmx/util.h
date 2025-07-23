@@ -1,9 +1,10 @@
 #pragma once
 #include <chrono>
 #include <iostream>
+#include "lmdb.h"
 #include "osmium/tags/taglist.hpp"
 
-#define CHECK(x) if (0 != x) { printf("%s, file %s, line %d.\n", mdb_strerror(x), __FILE__, __LINE__); abort(); }
+#define CHECK_LMDB(x) if (0 != x) { printf("%s, file %s, line %d.\n", mdb_strerror(x), __FILE__, __LINE__); abort(); }
 
 // a higher cell level results in more precise extracts, as the size of 1 cell is the minimum index resolution.
 #define CELL_INDEX_LEVEL 16

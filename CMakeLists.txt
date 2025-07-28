@@ -48,6 +48,13 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS)
 
 FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.12.0
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
+FetchContent_Declare(
     Osmium
     GIT_REPOSITORY https://github.com/osmcode/libosmium.git
     GIT_TAG v2.22.0
@@ -62,7 +69,8 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(CapnProto Catch2 cxxopts LMDB Osmium Protozero)
+FetchContent_MakeAvailable(
+    CapnProto Catch2 cxxopts LMDB nlohmann_json Osmium Protozero)
 
 if(NOT CapnProto_FOUND)
     add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
@@ -101,7 +109,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
 include_directories(vendor/s2geometry/src)
 include_directories(vendor/CRoaring/cpp)
 include_directories(vendor/CRoaring/include)
-include_directories(vendor/json/single_include)
 include_directories(include)
 
 # needed for Expat install dir
@@ -132,7 +139,8 @@ target_include_directories(
 
 target_link_libraries(
     osmx
-    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z)
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB
+    nlohmann_json::nlohmann_json roaring s2 z)
 
 set_property(TARGET osmx PROPERTY CXX_STANDARD 14)
 
@@ -146,7 +154,8 @@ target_include_directories(
 
 target_link_libraries(
     osmxTest
-    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB
+    nlohmann_json::nlohmann_json roaring s2 z
     Catch2::Catch2WithMain)
 
 enable_testing()
@@ -173,5 +182,5 @@ target_include_directories(
 
 target_link_libraries(
     osmx-static
-    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB roaring s2 z)
-
+    bz2 CapnProto::capnp cxxopts::cxxopts expat LMDB::LMDB
+    nlohmann_json::nlohmann_json roaring s2 z)

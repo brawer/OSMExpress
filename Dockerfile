@@ -15,6 +15,7 @@ RUN apk add --no-cache  \
     expat-dev           \
     libosmium-dev       \
     lmdb-dev            \
+    nlohmann-json       \
     openssl-dev         \
     protozero-dev       \
     zlib-dev
@@ -28,8 +29,9 @@ RUN make -j16 && ./osmxTest && make install
 
 FROM alpine:3.22
 
-# cxxopts, libosmium and protozero are header-only C++ libraries;
-# catch2 is only used for testing. We do not need to install these.
+# cxxopts, libosmium, nlohmann-json and protozero are header-only
+# C++ libraries; catch2 is only used for testing. We do not need
+# to install these.
 RUN apk add --no-cache  \
     libbz2              \
     libcrypto3          \

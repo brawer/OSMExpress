@@ -1,9 +1,10 @@
 #include <string>
+
+#include <nlohmann/json.hpp>
 #include "s2/s2region.h"
 #include "s2/s2cell_union.h"
 #include "s2/s2region_coverer.h"
 #include "s2/s2latlng_rect.h"
-#include "nlohmann/json.hpp"
 
 class Region {
 public:

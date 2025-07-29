@@ -4,6 +4,3 @@
 [submodule "vendor/s2geometry"]
 	path = vendor/s2geometry
 	url = https://github.com/google/s2geometry.git
-[submodule "vendor/json"]
-	path = vendor/json
-	url = https://github.com/nlohmann/json.git

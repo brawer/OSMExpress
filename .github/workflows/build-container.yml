@@ -1,0 +1,34 @@
+name: Build and push container image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Log into the container registry
+        if: github.event_name != 'pull_request'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build the container image
+        run: podman build -t ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }} .
+
+      - name: Push the container image to the registry
+        if: github.event_name != 'pull_request'
+        run: |
+          podman push ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}
+          podman push ghcr.io/${GITHUB_REPOSITORY,,}:latest

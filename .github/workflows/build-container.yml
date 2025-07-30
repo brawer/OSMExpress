@@ -1,0 +1,61 @@
+name: Build and push container image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Log into the container registry
+        if: github.event_name != 'pull_request'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build the container image
+        run: |
+          # Container image identifiers must be all-lowercase.
+          # The two commas transform "User/OSMExpress" to "user/osmexpress".
+          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
+          SHA_TAG=${{ github.sha }}
+          LATEST_TAG=latest
+
+          # Build the container image with SHA and latest tags.
+          podman build -t ${IMAGE_ID}:${SHA_TAG} -t ${IMAGE_ID}:${LATEST_TAG} .
+
+          # If this is a release event, tag the image with the release tag.
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG=${{ github.event.release.tag_name }}
+            podman tag ${IMAGE_ID}:${SHA_TAG} ${IMAGE_ID}:${RELEASE_TAG}
+          fi
+
+      - name: Push the container image to the registry
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
+          SHA_TAG=${{ github.sha }}
+          LATEST_TAG=latest
+
+          # Push the container image with SHA and latest tags.
+          podman push $IMAGE_ID:$SHA_TAG
+          podman push $IMAGE_ID:$LATEST_TAG
+
+          # If this is a release event, push the image with the release tag.
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG=${{ github.event.release.tag_name }}
+            podman push $IMAGE_ID:$RELEASE_TAG
+          fi

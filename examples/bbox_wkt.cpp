@@ -5,7 +5,7 @@
 #include "s2/s2latlng.h"
 #include "s2/s2region_coverer.h"
 #include "s2/s2latlng_rect.h"
-#include "roaring64map.hh"
+#include "roaring/roaring64map.hh"
 
 using namespace std;
 

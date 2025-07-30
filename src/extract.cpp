@@ -147,9 +147,9 @@ void cmdExtract(int argc, char * argv[]) {
     cout << "Query cells: " << covering.cell_ids().size() << endl;
   }
 
-  Roaring64Map node_ids;
-  Roaring64Map way_ids;
-  Roaring64Map relation_ids;
+  roaring::Roaring64Map node_ids;
+  roaring::Roaring64Map way_ids;
+  roaring::Roaring64Map relation_ids;
 
   MDB_env* env = db::createEnv(result["osmx"].as<string>(),false);
   MDB_txn* txn;
@@ -214,8 +214,8 @@ void cmdExtract(int argc, char * argv[]) {
     MDB_cursor *cursor;
     CHECK_LMDB(mdb_dbi_open(txn, "relation_relation", MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_INTEGERDUP, &dbi));
     CHECK_LMDB(mdb_cursor_open(txn,dbi,&cursor));
-    Roaring64Map discovered_relations;
-    Roaring64Map discovered_relations_2;
+    roaring::Roaring64Map discovered_relations;
+    roaring::Roaring64Map discovered_relations_2;
 
     for (auto const &relation_id : relation_ids) {
       db::traverseReverse(cursor,relation_id,discovered_relations);

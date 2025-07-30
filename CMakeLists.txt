@@ -9,8 +9,8 @@ set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "-pthread")
 set(OSMX_VERSION "0.2.0")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
-set(ROARING_BUILD_STATIC ON CACHE INTERNAL "")
-set(ROARING_LINK_STATIC ON CACHE INTERNAL "")
+set(ROARING_USE_CPM OFF)
+set(ENABLE_ROARING_TESTS OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(FetchContent)
@@ -69,8 +69,15 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS)
 
+FetchContent_Declare(
+    roaring
+    GIT_REPOSITORY https://github.com/RoaringBitmap/CRoaring.git
+    GIT_TAG v4.3.6
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS)
+
 FetchContent_MakeAvailable(
-    CapnProto Catch2 cxxopts LMDB nlohmann_json Osmium Protozero)
+    CapnProto Catch2 cxxopts LMDB nlohmann_json Osmium Protozero roaring)
 
 if(NOT CapnProto_FOUND)
     add_subdirectory(${capnproto_SOURCE_DIR} EXCLUDE_FROM_ALL)
@@ -104,11 +111,8 @@ if(NOT Protozero_FOUND)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2geometry EXCLUDE_FROM_ALL)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/CRoaring EXCLUDE_FROM_ALL)
 
 include_directories(vendor/s2geometry/src)
-include_directories(vendor/CRoaring/cpp)
-include_directories(vendor/CRoaring/include)
 include_directories(include)
 
 # needed for Expat install dir

@@ -1,6 +1,3 @@
-[submodule "vendor/CRoaring"]
-	path = vendor/CRoaring
-	url = https://github.com/RoaringBitmap/CRoaring.git
 [submodule "vendor/s2geometry"]
 	path = vendor/s2geometry
 	url = https://github.com/google/s2geometry.git

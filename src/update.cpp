@@ -2,13 +2,57 @@
 #include <cassert>
 #include <set>
 #include "cxxopts.hpp"
-#include "roaring.hh"
 #include "osmium/handler.hpp"
 #include "osmium/io/any_input.hpp"
 #include "osmium/visitor.hpp"
 #include "osmium/util/progress_bar.hpp"
+#include "roaring/roaring.hh"
+
+// Historically, OSMExpress had vendored its dependencies, but we move away
+// from this. At the moment, the S2 geometry library is the last remaining
+// dependency still being vendored. Our (rather ancient) bundled version
+// of S2 tests for a number of implementations of the Standard C library.
+// If S2 happens to recognize the library, it includes <byteswap.h>
+// (unless it is being compiled by a Microsoft or Apple compiler);
+// otherwise, S2 falls back to its own byteswap implementation.
+// What S2 does (or rather did, in the old version we happen
+// to bundle) isn't so great; it would have been better for S2 to use
+// a standards-conforming way of byteswapping, test for its presence,
+// and only use the fallback if that test fails. But that's how it is.
+//
+// Anyhow, the (equally ancient) version of CRoaring, another library
+// that we previously vendored into OSMExpress, was polluting the
+// C macro namespace in a way that made our bundled version of S2
+// believe to be on a C library it knew about. Therefore, at the time
+// when OSMExpress still vendored that old version of CRoaring, the
+// bundled version of S2 would always include <byteswap.h> instead
+// of (re-)defining it, even if S2 did not recognize the C library.
+//
+// As we upgraded CRoaring to a newer version, which does not pollute
+// the C macro namespace anymore, the C preprocessor would now execute
+// the fallback path in the S2 headers when compiling with a Standard C
+// library that our old version of S2 does not recognize. This caused
+// compilation errors on Alpine Linux, which uses musl, a very lightweight
+// but fully standards-conforming implementation of the Standard C library.
+//
+// The following hack prevents our vendored old version of S2 from
+// supplying its own byteswap functions. On Bionic (and also other
+// modern libc implementations, including musl), it is sufficient to
+// include <byteswap.h>. Note we cannot explicitly test for musl here,
+// because musl does not define a __MUSL__ macro. (They don't want to,
+// since such a macro would not be standards-conforming; whether it's
+// really helpful to be so puristic has been the subject of much debate).
+//
+// TODO: Remove this hack once we stop vendoring the S2 geometry library.
+// https://github.com/bdon/OSMExpress/issues/20
+#if !defined(_MSC_VER) && !defined(__APPLE__) && !defined(__GLIBC__) \
+    && !defined(__BIONIC__) && !defined(__ASYLO__)
+#define __BIONIC__ 1
+#endif
+
 #include "s2/s2latlng.h"
 #include "s2/s2cell_union.h"
+
 #include "osmx/storage.h"
 #include "osmx/util.h"
 

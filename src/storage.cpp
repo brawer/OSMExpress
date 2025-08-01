@@ -168,7 +168,7 @@ void IndexWriter::commit() {
   CHECK_LMDB(mdb_txn_commit(mTxn));
 }
 
-void traverseCell(MDB_cursor *cursor,S2CellId cell_id,Roaring64Map &set) {
+void traverseCell(MDB_cursor *cursor, S2CellId cell_id, roaring::Roaring64Map &set) {
   S2CellId start = cell_id.child_begin(CELL_INDEX_LEVEL);
   S2CellId end = cell_id.child_end(CELL_INDEX_LEVEL);
   MDB_val key, data;
@@ -191,7 +191,7 @@ void traverseCell(MDB_cursor *cursor,S2CellId cell_id,Roaring64Map &set) {
   }
 }
 
-void traverseReverse(MDB_cursor *cursor,uint64_t from, Roaring64Map &set) {
+void traverseReverse(MDB_cursor *cursor,uint64_t from, roaring::Roaring64Map &set) {
   MDB_val key, data;
   key.mv_size = sizeof(uint64_t);
   key.mv_data = (void *)&from;

@@ -1,5 +1,7 @@
 FROM alpine:3.22 AS builder
 
+# TODO: Add croaring-dev once available in Alpine Linux.
+# https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/87769
 RUN apk add --no-cache  \
     clang               \
     cmake               \
@@ -31,7 +33,7 @@ FROM alpine:3.22
 
 # cxxopts, libosmium, nlohmann-json and protozero are header-only
 # C++ libraries; catch2 is only used for testing. We do not need
-# to install these.
+# them in the production container.
 RUN apk add --no-cache  \
     libbz2              \
     libcrypto3          \

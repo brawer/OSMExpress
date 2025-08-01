@@ -1,6 +1,15 @@
+# Configuration for automatic version updates via GitHub Dependabot.
+#
+# As of August 2025, Dependabot does not yet support CMake:
+# https://github.com/dependabot/dependabot-core/issues/7451
+#
+# Therefore, we use Dependabot only for keeping our Dockerfile
+# (which defines the contents of our production container)
+# up to date.
+
 version: 2
 updates:
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
